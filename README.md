@@ -33,6 +33,6 @@ This will generate **result.txt** which will have all the stated metrics.
 
 To get the predicted responses of the model and gold responses, please run:
 ```
-python read.py --dir ./outputs/wiz
+python read.py --dir ../outputs/wiz
 ```
 This will generate the required **output.csv**.
