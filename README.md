@@ -3,7 +3,7 @@ The code and sample data for our work is organized as:
 - ```source/``` contains the main model scripts
 - ```sample_processed_data/``` has a small sample of the dataset files after preprocessing
 - ```tools/``` has the evaluation script
-- ```sample_model/``` contains the training logs and model parameters file for the model built on the **sample data**
+- ```sample_model/``` contains some training logs and model parameters file for the model built on the **sample data**
 
 ## Requirements
 The implementation is based on Python 3.x. To install the dependencies used, please run:
@@ -14,7 +14,7 @@ pip install -r requirements.txt
 ## Training
 For training CTKMN, please run the following command. All available parameters and flags have been described in main.py.
 ```
-CUDA_VISIBLE_DEVICES=x python main.py --data ./sample_processed_data/wizard/ --save_dir ./sample_model/wiz --embed_size 300 --batch_size 8 --share_vocab False --vocab_type dlg-shared-seen --num_epochs 30 --bidirectional True --log_steps 2
+CUDA_VISIBLE_DEVICES=x python main.py --data_dir ./sample_processed_data/wizard/ --save_dir ./sample_model/wiz --embed_size 300 --batch_size 8 --share_vocab False --vocab_type dlg-shared-seen --num_epochs 30 --bidirectional True --log_steps 2
 ```
 
 ## Testing
