@@ -1,7 +1,3 @@
-# m
-# python main.py --data_dir ./prepared_data/topical_chat --save_dir ./models/topical_chat
-# python main.py --test --ckpt state_epoch_8.model --data_dir ./prepared_data/topical_chat --save_dir ./models/topical_new --output_dir ./outputs/topical_new
-
 import os
 import json
 import logging
@@ -11,7 +7,7 @@ import torch
 from source.inputter.corpus import KnowledgeCorpus
 from source.model.seq2seq import Seq2Seq
 from source.utils.engine import Trainer
-from source.utils.generator import BeamGenerator
+from source.utils.generator_csv import BeamGenerator
 from source.utils.misc import str2bool
 
 
@@ -23,10 +19,10 @@ def model_config():
 
     # Data
     data_arg = parser.add_argument_group("Data")
-    data_arg.add_argument("--data_dir", type=str, default="./prepared_data/cmu_DoG")
-    data_arg.add_argument("--save_dir", type=str, default="./models/cmu_new")
-    data_arg.add_argument("--output_dir", type=str, default="./outputs/cmu_new")
-    data_arg.add_argument("--vocab_type", type=str, default="all")
+    data_arg.add_argument("--data_dir", type=str, default="./processed_data/wizard")
+    data_arg.add_argument("--save_dir", type=str, default="./models/wiz")
+    data_arg.add_argument("--output_dir", type=str, default="./outputs/wiz")
+    data_arg.add_argument("--vocab_type", type=str, default="dlg-shared-seen")
     data_arg.add_argument("--embed_file", type=str, default=None)
 
     # Network
@@ -37,11 +33,12 @@ def model_config():
     net_arg.add_argument("--bidirectional", type=str2bool, default=False)
     net_arg.add_argument("--max_vocab_size", type=int, default=30000)
     net_arg.add_argument("--min_len", type=int, default=1)
-    net_arg.add_argument("--max_len", type=int, default=50)
+    net_arg.add_argument("--max_len", type=int, default=48)
     net_arg.add_argument("--min_kb_len", type=int, default=0)
-    net_arg.add_argument("--max_kb_len", type=int, default=1000)
+    net_arg.add_argument("--max_kb_len", type=int, default=98)
     net_arg.add_argument("--num_layers", type=int, default=1)
-    net_arg.add_argument("--max_hop", type=int, default=3)
+    net_arg.add_argument("--max_dlg_hop", type=int, default=3)
+    net_arg.add_argument("--max_kb_hop", type=int, default=3)
     net_arg.add_argument("--attn", type=str, default='mlp', choices=['none', 'mlp', 'dot', 'general'])
     net_arg.add_argument("--share_vocab", type=str2bool, default=True)
     net_arg.add_argument("--with_bridge", type=str2bool, default=False)
@@ -79,8 +76,6 @@ def main():
     main
     """
     config = model_config()
-    # torch.cuda.set_device(5)
-    # print("GPU:", torch.cuda.current_device())
     config.use_gpu = torch.cuda.is_available() and config.gpu >= 0
 
     # Data definition
@@ -89,21 +84,20 @@ def main():
                              min_len=config.min_len, max_len=config.max_len, min_kb_len=config.min_kb_len, max_kb_len=config.max_kb_len,
                              embed_file=config.embed_file, share_vocab=config.share_vocab, vocab_type=config.vocab_type)
     corpus.load()
-    print('corpus loaded')
-
+    print('Corpus loaded')
 
     # Model definition
     model = Seq2Seq(src_field=corpus.SRC, tgt_field=corpus.TGT,
-                    kb_field=corpus.KB, embed_size=config.embed_size,
+                    kb_field=corpus.KB, kbt_field = corpus.KBT, embed_size=config.embed_size,
                     hidden_size=config.hidden_size, padding_idx=corpus.padding_idx,
                     num_layers=config.num_layers, bidirectional=config.bidirectional,
                     attn_mode=config.attn, with_bridge=config.with_bridge,
                     tie_embedding=config.tie_embedding, dropout=config.dropout,
-                    max_hop=config.max_hop, use_gpu=config.use_gpu)
+                    max_dlg_hop=config.max_dlg_hop, max_kb_hop=config.max_kb_hop, use_gpu=config.use_gpu)
 
     # Generator definition
     generator = BeamGenerator(model=model, src_field=corpus.SRC, tgt_field=corpus.TGT,
-                              beam_size=config.beam_size, max_length=config.max_dec_len,
+                              kb_field=corpus.KB, kbt_field = corpus.KBT, beam_size=config.beam_size, max_length=config.max_dec_len,
                               ignore_unk=config.ignore_unk,
                               length_average=config.length_average, use_gpu=config.use_gpu)
 
@@ -164,6 +158,7 @@ def main():
                           save_dir=config.save_dir, log_steps=config.log_steps,
                           valid_steps=config.valid_steps, grad_clip=config.grad_clip,
                           lr_scheduler=lr_scheduler, entity_dir=config.data_dir, generator=generator)
+        
         if config.ckpt is not None:
             trainer.load(file_ckpt=config.ckpt)
         trainer.train()

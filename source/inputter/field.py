@@ -1,5 +1,3 @@
-# m
-
 import re
 import nltk
 import torch
@@ -20,11 +18,6 @@ def tokenize(s):
     tokenize
     """
     return tokenizer(s)
-    #print(x)
-    # s = re.sub('\d+', NUM, s).lower()
-    # tokens = nltk.RegexpTokenizer(r'\w+|<sil>|[^\w\s]+').tokenize(s)
-    #toks = s.split(' ')
-    #return toks
 
 class Field(object):
     """
@@ -85,8 +78,9 @@ class TextField(Field):
                  bos_token=BOS,
                  eos_token=EOS,
                  special_tokens=None,
-                 embed_file=None):
-        super(TextField, self).__init__(sequential=True, fix_length=50, dtype=int)
+                 embed_file=None,
+                 max_len=50):
+        super(TextField, self).__init__(sequential=True, dtype=int, fix_length=max_len)
 
         self.tokenize_fn = tokenize_fn if tokenize_fn is not None else str.split
         self.pad_token = pad_token
@@ -180,7 +174,8 @@ class TextField(Field):
             cover = 0
             print("Building word embeddings from '{}' ...".format(embed_file))
             with open(embed_file, "r") as f:
-                num, dim = map(int, f.readline().strip().split())
+                #num, dim = map(str, f.readline().strip().split())
+                num, dim = 0, 300
                 embeds = [[0] * dim] * len(self.stoi)
                 for line in f:
                     w, vs = line.rstrip().split(maxsplit=1)
@@ -226,7 +221,7 @@ class TextField(Field):
             tokens.append(self.bos_token)
 
         temp = self.tokenize_fn(string)
-        if(len(temp)>max_len):
+        if(len(temp) > max_len):
             print(f"trunc: {len(temp)}")
             temp = temp[-max_len:]
         tokens += temp

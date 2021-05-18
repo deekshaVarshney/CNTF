@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""
-File: source/module/memory_helper.py
-"""
-
 import torch
 import torch.nn as nn
 

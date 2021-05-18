@@ -15,38 +15,38 @@ if __name__ == '__main__':
     parser.add_argument("--eval_dir", type=str)
     parser.add_argument("--pred_file", type=str)
     parser.add_argument("--ref_file", type=str)
+    parser.add_argument("--result_file", type=str, default='result')
     args = parser.parse_args()
 
     eval_dir = args.eval_dir
 
-    eval_file = "%s/output.txt" % eval_dir
+    eval_file = f"{eval_dir}/output.json"
 
     # calculate metrics
     hyps = []
     refs = []
-    with open(eval_file, 'r') as fr:
-        for line in fr:
-            dialog = json.loads(line.strip())
-            pred_str = dialog["result"]
-            gold_str = dialog["target"]
-            hyps.append(pred_str)
-            refs.append(gold_str)
     
+    refs = [l.strip().split("\n")[0][1:-1] for l in open(f'{eval_dir}/{args.ref_file}.txt', 'r').readlines()]
+    hyps = [l.strip().split("\n")[0][1:-1] for l in open(f'{eval_dir}/{args.pred_file}.txt', 'r').readlines()]
+    print(hyps[0])
+    print(refs[0])
     assert len(hyps) == len(refs)
     
     f_score = F1_Score(refs, hyps)
-
+    print("F1score", f_score)
     hyp_arrys = np.array(hyps)
     ref_arrys = np.array(refs)
     bleu_score = moses_multi_bleu(hyp_arrys, ref_arrys, lowercase=True)
-    metrics_dict = compute_metrics(hypothesis=args.pred_file, references=[args.ref_file])
+    print("bleu", bleu_score)
+    metrics_dict = compute_metrics(hypothesis=f'{eval_dir}/{args.pred_file}.txt', references=[f'{args.eval_dir}/{args.ref_file}.txt'])
+    print(metrics_dict)
     
     output_str = "BLEU SCORE(PERL): %.3f\n" % bleu_score
+    
     output_str += "F1 SCORE: %.2f%%\n" % (f_score * 100)
     output_str += str(metrics_dict)
     
-    # write evaluation results to file
-    out_file = "%s/eval.result1.txt" % eval_dir
+    out_file = f"{eval_dir}/{args.result_file}.txt"
     with open(out_file, 'w') as fw:
         fw.write(output_str)
     print("Saved evaluation results to '{}.'".format(out_file))

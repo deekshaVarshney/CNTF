@@ -31,7 +31,7 @@ class Pack(dict):
         """
         pack = Pack()
         for k, v in self.items():
-            if k in ['src', 'tgt', 'kb']:
+            if k in ['src', 'tgt', 'kb', 'kb_gt', 'ptr_index', 'kb_index']:
                 if isinstance(v, tuple):
                     pack[k] = tuple(x.cuda(device) for x in v)
                 else:
@@ -71,7 +71,7 @@ def max_lens(X):
             "Data list whose dim is greater than 3 is not supported!")
 
 
-def list2tensor(X):
+def list2tensor(X, verb=False):
     """
     list2tensor
     """
@@ -93,7 +93,8 @@ def list2tensor(X):
                 l = len(x)
                 tensor[i, j, :l] = torch.tensor(x)
                 lengths[i, j] = l
-
+    if verb:
+        print(tensor)
     return tensor, lengths
 
 

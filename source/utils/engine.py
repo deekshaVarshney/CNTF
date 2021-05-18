@@ -1,5 +1,3 @@
-# m
-
 import os
 import time
 import shutil
@@ -8,7 +6,7 @@ import torch
 import sys
 
 from collections import defaultdict
-from source.inputter.batcher import create_turn_batch , create_kb_batch
+from source.inputter.batcher import create_turn_batch, create_kb_batch
 
 class MetricsManager(object):
     """
@@ -33,10 +31,13 @@ class MetricsManager(object):
 
                     if isinstance(val, torch.Tensor):
                         val = val.item()
-                        self.metrics_cum[key] += val * num_samples
+                        if key != 'pl':
+                            self.metrics_cum[key] += val * num_samples
+                        else:
+                            self.metrics_cum[key] += val
                     elif isinstance(val, tuple):
                         assert len(val) == 2
-                        val, num_words = val[0].item(), val[1]
+                        val, num_words = val[0].item(), val[1].item()
                         self.metrics_cum[key] += np.array([val * num_samples, num_words])
                     else:
                         self.metrics_cum[key] += val * num_samples
@@ -131,7 +132,6 @@ class Trainer(object):
             "inf") if self.is_decreased_valid_metric else -float("inf")
         self.epoch = 0
         self.batch_num = 0
-        self.use_rl = False
 
         self.train_start_message = "\n".join(["",
                                               "=" * 85,
@@ -150,7 +150,6 @@ class Trainer(object):
             print(f"Epoch: {self.epoch}\n")
             self.train_epoch()
 
-        self.use_rl = False
         self.valid_metric_name = "bleu_score"      # "bleu_score" or "f1_score"
         self.best_valid_metric = -float("inf")
         self.is_decreased_valid_metric = False
@@ -182,14 +181,14 @@ class Trainer(object):
             
             #print(f"local data [engine]: {local_data}")
             turn_inputs = create_turn_batch(local_data['inputs'])
-            #kb_inputs = create_kb_batch(local_data['kbs'])
+            kbt_inputs = create_kb_batch(local_data['kbts'])
             assert len(turn_inputs) == local_data['max_turn']
             # print(f"no of turns [engine]: {len(turn_inputs)}\n")
             
             metrics_list = self.model.iterate(turn_inputs,
+                                              kbt_inputs,
                                               optimizer=self.optimizer,
                                               grad_clip=self.grad_clip,
-                                              use_rl=self.use_rl,
                                               entity_dir=self.entity_dir,
                                               is_training=True)
 
@@ -206,7 +205,7 @@ class Trainer(object):
 
             if (batch_idx + 1) % self.valid_steps == 0:
                 self.logger.info(self.valid_start_message)
-                valid_mm = self.evaluate(self.model, self.valid_iter, self.generator, use_rl=self.use_rl, entity_dir=self.entity_dir)
+                valid_mm = self.evaluate(self.model, self.valid_iter, self.generator, entity_dir=self.entity_dir)
 
                 message_prefix = "[Valid][{:2d}][{}/{}]".format(self.epoch, batch_idx + 1, num_batches)
                 metrics_message = valid_mm.report_cum()
@@ -219,7 +218,7 @@ class Trainer(object):
                     is_best = cur_valid_metric > self.best_valid_metric
                 if is_best:
                     self.best_valid_metric = cur_valid_metric
-                self.save(is_best, is_rl=self.use_rl)
+                self.save(is_best)
                 if self.lr_scheduler is not None:
                     self.lr_scheduler.step(cur_valid_metric)
                 self.logger.info("-" * 85 + "\n")
@@ -228,7 +227,7 @@ class Trainer(object):
         self.logger.info('')
 
     @staticmethod
-    def evaluate(model, data_iter, generator, use_rl=False, entity_dir=None):
+    def evaluate(model, data_iter, generator, entity_dir=None):
         """
         evaluate
         """
@@ -239,18 +238,17 @@ class Trainer(object):
             for batch_idx in range(num_batches):
                 local_data = data_iter.get_batch(batch_idx)
                 turn_inputs = create_turn_batch(local_data['inputs'])
-                #kb_inputs = create_kb_batch(local_data['kbs'])
+                kbt_inputs = create_kb_batch(local_data['kbts'])
                 assert len(turn_inputs) == local_data['max_turn']
 
-                metrics_list = model.iterate(turn_inputs,
-                                             use_rl=use_rl, entity_dir=entity_dir, is_training=False)
+                metrics_list = model.iterate(turn_inputs, kbt_inputs, entity_dir=entity_dir, is_training=False)
                 mm.update(metrics_list)
                 if batch_idx == 0:
                     # call generator for viewing intermediate prediction
-                    res = generator.forward(turn_inputs=turn_inputs)
+                    res = generator.forward(turn_inputs, kbt_inputs)
         return mm
 
-    def save(self, is_best=False, is_rl=False):
+    def save(self, is_best=False):
         """
         save
         """
@@ -269,12 +267,8 @@ class Trainer(object):
         self.logger.info("Saved train state to '{}'".format(train_file))
 
         if is_best:
-            if is_rl:
-                best_model_file = os.path.join(self.save_dir, "best_rl.model")
-                best_train_file = os.path.join(self.save_dir, "best_rl.train")
-            else:
-                best_model_file = os.path.join(self.save_dir, "best.model")
-                best_train_file = os.path.join(self.save_dir, "best.train")
+            best_model_file = os.path.join(self.save_dir, "best.model")
+            best_train_file = os.path.join(self.save_dir, "best.train")
             shutil.copy(model_file, best_model_file)
             shutil.copy(train_file, best_train_file)
             self.logger.info(

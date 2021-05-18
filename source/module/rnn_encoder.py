@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""
-File: source/module/rnn_encoder.py
-"""
-
 import torch
 import torch.nn as nn
 

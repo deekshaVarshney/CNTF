@@ -1,5 +1,3 @@
-# m
-
 import os
 import torch
 import json
@@ -27,6 +25,7 @@ class KnowledgeCorpus(object):
 
         self.data_dir = data_dir
         self.prepared_data_file = f"{data_dir}/data.{vocab_type}.pt"
+        # CHANGE
         self.prepared_vocab_file = f"{data_dir}/vocab.{vocab_type}.pt"
         self.min_freq = min_freq
         self.max_vocab_size = max_vocab_size
@@ -37,30 +36,23 @@ class KnowledgeCorpus(object):
         self.share_vocab = share_vocab
 
         self.data = {}
-        self.SRC = TextField(tokenize_fn=tokenize, embed_file=embed_file)
+        self.SRC = TextField(tokenize_fn=tokenize, embed_file=embed_file, max_len=self.max_len)
         if self.share_vocab:
             self.TGT = self.SRC
             self.KB = self.SRC
+            self.KBT = self.SRC
         else:
-            self.TGT = TextField(tokenize_fn=tokenize, embed_file=embed_file)
-            self.KB = TextField(tokenize_fn=tokenize, embed_file=embed_file)
+            self.TGT = self.SRC
+            self.KB = self.SRC
+            self.KBT = TextField(tokenize_fn=tokenize, embed_file=embed_file, max_len=self.max_kb_len)
 
         self.fields = {'src': self.SRC,
                        'tgt': self.TGT,
-                       'kb': self.KB}
+                       'kb': self.KB,
+                       'kb_gt': self.KB,
+                       'kbt': self.KBT }
         
-        self.max_lens = {'src': 2*self.max_len, 'tgt': self.max_len, 'kb': self.max_kb_len}
-
-        '''def src_filter_pred(src, t):
-            return min_len <= len(self.SRC.tokenize_fn(src)) <= max_len*t
-
-        def tgt_filter_pred(tgt, t):
-            return min_len <= len(self.TGT.tokenize_fn(tgt)) <= max_len*t
-
-        def kb_filter_pred(kb, t):
-            return min_kb_len <= len(self.KB.tokenize_fn(kb)) <= max_kb_len*t
-
-        self.filter_pred = lambda ex: src_filter_pred(" ".join(ex['src']), ex['turns']) and tgt_filter_pred(" ".join(ex['tgt']), ex['turns']) and kb_filter_pred(" ".join(ex['kb']), ex['turns'])'''
+        self.max_lens = {'src': 200, 'tgt': 100, 'kb': 800, 'kb_gt': 400, 'kbt': 200}
 
         # load vocab or build vocab if not exists
         self.load_vocab()
@@ -173,29 +165,52 @@ class KnowledgeCorpus(object):
             for line in fr:
                 sample = json.loads(line.strip())
                 conv_id = sample['conv_id']
+                st_id = sample['st_id']
                 turns = sample['turns']
                 text = sample['text']
-                kb = sample['kb']
+                kb_full = sample['kb']
+                '''gold_entity = sample['gold_entity']
+                ptr_index = sample['ptr_index']
+                kb_index = sample['kb_index']'''
+                kbt = sample['kbt']
                 src = []
                 tgt = []
+                kb = []
+                kb_gt = []
+
                 for t in range(0, len(text), 2):
                     if t == 0:
                         u_sent = text[t]
                         s_sent = text[t + 1]
+                        kb_turn = kb_full[t]
                     else:
                         u_sent = " ".join([text[t-1], text[t]])
                         s_sent = text[t+1]
+                        kb_turn = " ".join([kb_full[t-1], kb_full[t]])
                     src.append(u_sent)
                     tgt.append(s_sent)
+                    kb.append(kb_turn)
+
+                for t in range(1, len(text), 2):
+                    if kb_full[t].strip() != "no kb":
+                        kb_gt.append(kb_full[t])
+                    else:
+                       kb_gt.append(kb_full[t-1]) 
                 assert len(src) == turns
+                assert len(kb) == turns
+                assert len(kb_gt) == turns
                 data_sample = {'conv_id': conv_id,
+                               'st_id': st_id, 
                                'turns': turns,
                                'src': src,
                                'tgt': tgt,
                                'kb': kb,
+                               'kb_gt': kb_gt,
+                               'kbt': kbt
                                }
                 data.append(data_sample)
         print("Read {} {} examples".format(len(data), data_type.upper()))
+        #print(data_type.upper(), data[-1])
         return data
 
     def build_examples(self, data, data_type=None):

@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""
-File: source/utils/criterions.py
-"""
-
 import torch
 import torch.nn.functional as F
 from torch import distributions

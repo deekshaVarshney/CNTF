@@ -1,10 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""
-File: source/module/decoder_state.py
-"""
-
-
 class DecoderState(object):
     """
     State of Decoder.

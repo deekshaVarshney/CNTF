@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""
-File: source/utils/metrics.py
-"""
 import os
 import re
 import subprocess
@@ -47,7 +42,7 @@ def perplexity(logits, targets, weight=None, padding_idx=None):
     """
     batch_size = logits.size(0)
     if weight is None and padding_idx is not None:
-        weight = torch.ones(logits.size(-1))
+        weight = torch.ones(logits.size(-1)).cuda()
         weight[padding_idx] = 0
     nll = F.nll_loss(input=logits.view(-1, logits.size(-1)),
                      target=targets.contiguous().view(-1),
@@ -55,10 +50,13 @@ def perplexity(logits, targets, weight=None, padding_idx=None):
                      reduction='none')
     nll = nll.view(batch_size, -1).sum(dim=1)
     if padding_idx is not None:
-        word_cnt = targets.ne(padding_idx).float().sum()
+        word_cnt = targets.ne(padding_idx).float().sum(dim=1)
+        tot_word_cnt = targets.ne(padding_idx).float().sum()
         nll = nll / word_cnt
+    
     ppl = nll.exp()
-    return ppl
+    ppl = ppl.mean()
+    return ppl, tot_word_cnt
 
 
 def compute_prf(gold_entity_list, pred_sent, global_entity_list, kb_plain):
