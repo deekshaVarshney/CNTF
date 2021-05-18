@@ -5,3 +5,4 @@ torch==1.1.0
 tqdm
 nlgeval
 spacy
+pandas
