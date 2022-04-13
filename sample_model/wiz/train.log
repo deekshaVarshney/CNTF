@@ -1,0 +1,246 @@
+Saved params to './sample_model/wiz/params.json'
+Seq2Seq(
+  (enc_embedder): Embedder(1579, 300, padding_idx=0)
+  (rnn_encoder): RNNEncoder(
+    (embedder): Embedder(1579, 300, padding_idx=0)
+    (rnn): GRU(300, 256, batch_first=True)
+  )
+  (bert_encoder): transformers_model(
+    (encoder): BertModel(
+      (embeddings): BertEmbeddings(
+        (word_embeddings): Embedding(30522, 256, padding_idx=0)
+        (position_embeddings): Embedding(512, 256)
+        (token_type_embeddings): Embedding(2, 256)
+        (LayerNorm): LayerNorm((256,), eps=1e-12, elementwise_affine=True)
+        (dropout): Dropout(p=0.1, inplace=False)
+      )
+      (encoder): BertEncoder(
+        (layer): ModuleList(
+          (0): BertLayer(
+            (attention): BertAttention(
+              (self): BertSelfAttention(
+                (query): Linear(in_features=256, out_features=256, bias=True)
+                (key): Linear(in_features=256, out_features=256, bias=True)
+                (value): Linear(in_features=256, out_features=256, bias=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+              (output): BertSelfOutput(
+                (dense): Linear(in_features=256, out_features=256, bias=True)
+                (LayerNorm): LayerNorm((256,), eps=1e-12, elementwise_affine=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+            )
+            (intermediate): BertIntermediate(
+              (dense): Linear(in_features=256, out_features=3072, bias=True)
+            )
+            (output): BertOutput(
+              (dense): Linear(in_features=3072, out_features=256, bias=True)
+              (LayerNorm): LayerNorm((256,), eps=1e-12, elementwise_affine=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+          )
+          (1): BertLayer(
+            (attention): BertAttention(
+              (self): BertSelfAttention(
+                (query): Linear(in_features=256, out_features=256, bias=True)
+                (key): Linear(in_features=256, out_features=256, bias=True)
+                (value): Linear(in_features=256, out_features=256, bias=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+              (output): BertSelfOutput(
+                (dense): Linear(in_features=256, out_features=256, bias=True)
+                (LayerNorm): LayerNorm((256,), eps=1e-12, elementwise_affine=True)
+                (dropout): Dropout(p=0.1, inplace=False)
+              )
+            )
+            (intermediate): BertIntermediate(
+              (dense): Linear(in_features=256, out_features=3072, bias=True)
+            )
+            (output): BertOutput(
+              (dense): Linear(in_features=3072, out_features=256, bias=True)
+              (LayerNorm): LayerNorm((256,), eps=1e-12, elementwise_affine=True)
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+          )
+        )
+      )
+      (pooler): BertPooler(
+        (dense): Linear(in_features=256, out_features=256, bias=True)
+        (activation): Tanh()
+      )
+    )
+  )
+  (dec_embedder): Embedder(1579, 300, padding_idx=0)
+  (kb_embedder): Embedder(1579, 300, padding_idx=0)
+  (kbt_embedder): Embedder(491, 300, padding_idx=0)
+  (trans_layer): Linear(in_features=900, out_features=256, bias=True)
+  (decoder): RNNDecoder(
+    (embedder): Embedder(1579, 300, padding_idx=0)
+    (dlg_attention): Attention(
+      (rnn): GRU(512, 256, batch_first=True)
+      (linear_query): ModuleList(
+        (0): Linear(in_features=256, out_features=256, bias=True)
+        (1): Linear(in_features=256, out_features=256, bias=True)
+        (2): Linear(in_features=256, out_features=256, bias=True)
+      )
+      (linear_memory): ModuleList(
+        (0): Linear(in_features=256, out_features=256, bias=False)
+        (1): Linear(in_features=256, out_features=256, bias=False)
+        (2): Linear(in_features=256, out_features=256, bias=False)
+      )
+      (v): ModuleList(
+        (0): Linear(in_features=256, out_features=1, bias=False)
+        (1): Linear(in_features=256, out_features=1, bias=False)
+        (2): Linear(in_features=256, out_features=1, bias=False)
+      )
+      (tanh): Tanh()
+      (softmax): Softmax(dim=-1)
+      (sigmoid): Sigmoid()
+      (linear_forget): ModuleList(
+        (0): Linear(in_features=256, out_features=256, bias=False)
+        (1): Linear(in_features=256, out_features=256, bias=False)
+        (2): Linear(in_features=256, out_features=256, bias=False)
+      )
+      (linear_add): ModuleList(
+        (0): Linear(in_features=256, out_features=256, bias=False)
+        (1): Linear(in_features=256, out_features=256, bias=False)
+        (2): Linear(in_features=256, out_features=256, bias=False)
+      )
+    )
+    (kb_attention): Attention(
+      (rnn): GRU(512, 256, batch_first=True)
+      (linear_query): ModuleList(
+        (0): Linear(in_features=256, out_features=256, bias=True)
+        (1): Linear(in_features=256, out_features=256, bias=True)
+        (2): Linear(in_features=256, out_features=256, bias=True)
+      )
+      (linear_memory): ModuleList(
+        (0): Linear(in_features=256, out_features=256, bias=False)
+        (1): Linear(in_features=256, out_features=256, bias=False)
+        (2): Linear(in_features=256, out_features=256, bias=False)
+      )
+      (v): ModuleList(
+        (0): Linear(in_features=256, out_features=1, bias=False)
+        (1): Linear(in_features=256, out_features=1, bias=False)
+        (2): Linear(in_features=256, out_features=1, bias=False)
+      )
+      (tanh): Tanh()
+      (softmax): Softmax(dim=-1)
+      (sigmoid): Sigmoid()
+      (linear_forget): ModuleList(
+        (0): Linear(in_features=256, out_features=256, bias=False)
+        (1): Linear(in_features=256, out_features=256, bias=False)
+        (2): Linear(in_features=256, out_features=256, bias=False)
+      )
+      (linear_add): ModuleList(
+        (0): Linear(in_features=256, out_features=256, bias=False)
+        (1): Linear(in_features=256, out_features=256, bias=False)
+        (2): Linear(in_features=256, out_features=256, bias=False)
+      )
+    )
+    (kb_memory_v3): KnowledgeMemoryv3(
+      (dropout_layer): Dropout(p=0.0, inplace=False)
+      (linear_query): ModuleList(
+        (0): Linear(in_features=256, out_features=256, bias=True)
+        (1): Linear(in_features=256, out_features=256, bias=True)
+        (2): Linear(in_features=256, out_features=256, bias=True)
+      )
+      (linear_memory): ModuleList(
+        (0): Linear(in_features=256, out_features=256, bias=False)
+        (1): Linear(in_features=256, out_features=256, bias=False)
+        (2): Linear(in_features=256, out_features=256, bias=False)
+      )
+      (v): ModuleList(
+        (0): Linear(in_features=256, out_features=1, bias=False)
+        (1): Linear(in_features=256, out_features=1, bias=False)
+        (2): Linear(in_features=256, out_features=1, bias=False)
+      )
+      (tanh): Tanh()
+      (C_0): Embedding(491, 256, padding_idx=0)
+      (C_1): Embedding(491, 256, padding_idx=0)
+      (C_2): Embedding(491, 256, padding_idx=0)
+      (C_3): Embedding(491, 256, padding_idx=0)
+      (softmax): Softmax(dim=-1)
+      (sigmoid): Sigmoid()
+    )
+    (rnn): GRU(1068, 256, batch_first=True)
+    (gate_layer): Sequential(
+      (0): Linear(in_features=1324, out_features=1, bias=True)
+      (1): Sigmoid()
+    )
+    (copy_gate_layer): Sequential(
+      (0): Linear(in_features=512, out_features=1, bias=True)
+      (1): Sigmoid()
+    )
+    (copy_gate_layer_kbt): Sequential(
+      (0): Linear(in_features=256, out_features=1, bias=True)
+      (1): Sigmoid()
+    )
+    (output_layer): Sequential(
+      (0): Dropout(p=0.2, inplace=False)
+      (1): Linear(in_features=1324, out_features=256, bias=True)
+      (2): Linear(in_features=256, out_features=1579, bias=True)
+      (3): Softmax(dim=-1)
+    )
+  )
+  (sigmoid): Sigmoid()
+  (src_attention): Attention(
+    (rnn): GRU(512, 256, batch_first=True)
+    (linear_query): ModuleList(
+      (0): Linear(in_features=256, out_features=256, bias=True)
+      (1): Linear(in_features=256, out_features=256, bias=True)
+      (2): Linear(in_features=256, out_features=256, bias=True)
+    )
+    (linear_memory): ModuleList(
+      (0): Linear(in_features=256, out_features=256, bias=False)
+      (1): Linear(in_features=256, out_features=256, bias=False)
+      (2): Linear(in_features=256, out_features=256, bias=False)
+    )
+    (v): ModuleList(
+      (0): Linear(in_features=256, out_features=1, bias=False)
+      (1): Linear(in_features=256, out_features=1, bias=False)
+      (2): Linear(in_features=256, out_features=1, bias=False)
+    )
+    (tanh): Tanh()
+    (softmax): Softmax(dim=-1)
+    (sigmoid): Sigmoid()
+    (linear_forget): ModuleList(
+      (0): Linear(in_features=256, out_features=256, bias=False)
+      (1): Linear(in_features=256, out_features=256, bias=False)
+      (2): Linear(in_features=256, out_features=256, bias=False)
+    )
+    (linear_add): ModuleList(
+      (0): Linear(in_features=256, out_features=256, bias=False)
+      (1): Linear(in_features=256, out_features=256, bias=False)
+      (2): Linear(in_features=256, out_features=256, bias=False)
+    )
+  )
+  (nll_loss): NLLLoss()
+  (bce_loss): MaskBCELoss()
+)
+Number of parameters: 20720874
+
+Training starts ...
+
+=====================================================================================
+================================== Model Training ===================================
+=====================================================================================
+
+[Train][ 1][2/2]   LOSS-TURN-1=120.743   ACC-TURN-1=0.035   LOSS-TURN-2=136.448   ACC-TURN-2=0.052   LOSS-TURN-3=154.895   ACC-TURN-3=0.037   LOSS-TURN-4=141.121   ACC-TURN-4=0.037   LOSS-TURN-5=155.202   ACC-TURN-5=0.009   TIME=5.95s
+Saved model state to './sample_model/wiz/state_epoch_1.model'
+Saved train state to './sample_model/wiz/state_epoch_1.train'
+
+
+=====================================================================================
+================================== Model Training ===================================
+=====================================================================================
+
+[Train][ 2][2/2]   LOSS-TURN-1=115.580   ACC-TURN-1=0.027   LOSS-TURN-2=131.137   ACC-TURN-2=0.008   LOSS-TURN-3=152.374   ACC-TURN-3=0.031   LOSS-TURN-4=134.896   ACC-TURN-4=0.011   LOSS-TURN-5=146.907   ACC-TURN-5=0.039   TIME=4.56s
+Saved model state to './sample_model/wiz/state_epoch_2.model'
+Saved train state to './sample_model/wiz/state_epoch_2.train'
+
+
+=====================================================================================
+================================== Model Training ===================================
+=====================================================================================
+
