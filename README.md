@@ -2,7 +2,7 @@
 
 This is an implementation of our paper:
 
-Commonsense and Named Entity Aware Knowledge Grounded Dialogue Generation (NAACL 2022).
+Commonsense and Named Entity Aware Knowledge Grounded Dialogue Generation (NAACL 2022).<br>
 *Deeksha Varshney, Akshara Prabhakar, Asif Ekbal*
 
 ## Overview 
@@ -17,6 +17,11 @@ The code and sample data for our work is organized as:
 $ pip install -r requirements.txt
 ```
 2. Save the pretrained Glove embeddings (glove.840B.300d.txt).
+
+## Trained Models
+Our trained models on Wizard of Wikipedia and CMU_DoG can be downloaded from here:
+
+https://drive.google.com/drive/folders/1Syn_Q3utg83xgXqCdGGBlKQDChPGDg2n?usp=sharing
 
 ## Training
 For training CNTF, run the following command. All available parameters and flags have been described in main.py. Please refer to paper appendix for further details.
