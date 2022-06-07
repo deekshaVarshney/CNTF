@@ -4,7 +4,7 @@ This is an implementation of our paper:
 
 Commonsense and Named Entity Aware Knowledge Grounded Dialogue Generation (NAACL 2022).<br>
 *Deeksha Varshney, Akshara Prabhakar, Asif Ekbal*
-
+Link : https://arxiv.org/abs/2205.13928
 ## Overview 
 The code and sample data for our work is organized as:
 - ```source/``` contains the main model scripts
